@@ -111,7 +111,7 @@ def confusion_matrix(y: pd.Series, oof_preds: NDArray[np.float64], n_classes: in
 
 def run_model_pipeline(
         filepath: str
-) -> tuple[pd.DataFrame, pd.Series, list[str]]:
+) -> tuple[pd.DataFrame, pd.Series, NDArray[np.float64], list[str]]:
     """Run the model pipeline"""
 
     train = read_datasets(f'{filepath}/train.csv')
@@ -123,4 +123,4 @@ def run_model_pipeline(
     oof_preds = cross_validation(X, y, cat_cols)
 
     confusion_matrix(y, oof_preds)
-    return X, y, cat_cols
+    return X, y, oof_preds, cat_cols
