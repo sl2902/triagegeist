@@ -21,7 +21,7 @@ def bias_analysis(df: pd.DataFrame, y: pd.Series, oof_preds: NDArray[np.float64]
 
     # ── 1. Nurse-level bias ──────────────────────────────────────────────────────
     print("=== NURSE-LEVEL BIAS ===")
-    nurse_stats = df.groupby('triage_nurse_id').agg(
+    nurse_stats = df.groupby('triage_nurse_id', observed=True).agg(
         n=('true_esi', 'count'),
         mean_true_esi=('true_esi', 'mean'),
         mean_pred_esi=('oof_pred_esi', 'mean'),
@@ -50,7 +50,7 @@ def bias_analysis(df: pd.DataFrame, y: pd.Series, oof_preds: NDArray[np.float64]
     print("\n=== DEMOGRAPHIC BIAS ===")
     for col in ['sex', 'age_group', 'language', 'insurance_type']:
         print(f"\n--- {col} ---")
-        stats = df.groupby(col).agg(
+        stats = df.groupby(col, observed=True).agg(
             n=('true_esi', 'count'),
             undertriage_rate=('undertriage', 'mean'),
             mean_true_esi=('true_esi', 'mean'),
