@@ -6,6 +6,7 @@ from numpy.typing import NDArray
 import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 
+import model_training
 from utils import read_datasets
 from config import (
     params,
@@ -49,6 +50,7 @@ def cross_validation(
         y: pd.Series, 
         cat_cols: list[str],
         n_splits: int = 5,
+        n_classes: int = 5,
         shuffle: bool = True,
         random_state: int = 42,
     ) -> NDArray[np.float64]:
@@ -56,7 +58,7 @@ def cross_validation(
 
     # Retrain on full training data with 5-fold and average probabilities
     skf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
-    test_probs = np.zeros((len(X_test), n_splits))
+    test_probs = np.zeros((len(X_test), n_classes))
 
     for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
         X_train_fold = X.iloc[train_idx]
@@ -90,14 +92,11 @@ def run_prediction_pipeline(filepath: str) -> None:
     test_df = test.merge(test_history, on='patient_id', how='left')
 
     train = read_datasets(f'{filepath}/train.csv')
+    X, y, cat_cols = model_training.clean_dataframe(train)
+
     feature_cols = [c for c in train.columns if c not in drop_cols]
 
     X_test = clean_dataframe(test_df, feature_cols)
-
-    X = train[feature_cols]
-    y = train['triage_acuity'] - 1
-
-    cat_cols = train[feature_cols].select_dtypes(include=['object']).columns.tolist()
 
     test_probs = cross_validation(X_test, X, y, cat_cols)
 
