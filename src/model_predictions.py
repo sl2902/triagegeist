@@ -18,7 +18,7 @@ from config import (
 )
 
 
-def clean_dataframe(df: pd.DataFrame, feature_cols: list[str]) -> tuple[pd.DataFrame, list[str]]:
+def clean_dataframe(df: pd.DataFrame, feature_cols: list[str]) -> pd.DataFrame:
     """Clean dataframe"""
 
     # Apply same preprocessing as train
@@ -41,7 +41,7 @@ def clean_dataframe(df: pd.DataFrame, feature_cols: list[str]) -> tuple[pd.DataF
 
     X_test = df[feature_cols_test]
 
-    return X_test, cat_cols
+    return X_test
 
 def cross_validation(
         X_test: pd.DataFrame, 
@@ -56,7 +56,7 @@ def cross_validation(
 
     # Retrain on full training data with 5-fold and average probabilities
     skf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
-    test_probs = np.zeros((len(X_test), 5))
+    test_probs = np.zeros((len(X_test), n_splits))
 
     for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
         X_train_fold = X.iloc[train_idx]
@@ -92,10 +92,12 @@ def run_prediction_pipeline(filepath: str) -> None:
     train = read_datasets(f'{filepath}/train.csv')
     feature_cols = [c for c in train.columns if c not in drop_cols]
 
-    X_test, cat_cols = clean_dataframe(test_df, feature_cols)
+    X_test = clean_dataframe(test_df, feature_cols)
 
     X = train[feature_cols]
     y = train['triage_acuity'] - 1
+
+    cat_cols = train[feature_cols].select_dtypes(include=['object']).columns.tolist()
 
     test_probs = cross_validation(X_test, X, y, cat_cols)
 
