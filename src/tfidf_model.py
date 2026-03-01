@@ -18,15 +18,6 @@ from config import (
 )
 
 
-# Load complaints and join
-complaints = pd.read_csv(f'{path}/chief_complaints.csv')
-df2 = df.merge(complaints, on='patient_id', how='left')
-df2['chief_complaint_raw'] = df2['chief_complaint_raw'].fillna('unknown')
-
-# Drop same columns as before plus chief_complaint_system since it's in structured features
-# drop_cols = ['patient_id', 'triage_acuity', 'disposition', 'ed_los_hours', 
-#              'bmi', 'chief_complaint_raw']
-
 def clean_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, NDArray[str], list[str]]:
     """Prepare dataframe before training"""
     drop_cols = [
