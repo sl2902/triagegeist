@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 from sklearn.metrics import cohen_kappa_score
 
 
-def bias_analysis(df: pd.DataFrame, y: pd.Series, oof_preds: NDArray[np.float64]) -> None:
+def bias_analysis(df: pd.DataFrame, y: pd.Series, oof_preds: NDArray[np.float64]) -> pd.DataFrame:
     """Perform Bias analysis across multiple demographic dimensions"""
     
     # Rebuild df with oof_preds attached
@@ -58,3 +58,5 @@ def bias_analysis(df: pd.DataFrame, y: pd.Series, oof_preds: NDArray[np.float64]
         ).round(4)
         stats['esi_bias'] = (stats['mean_pred_esi'] - stats['mean_true_esi']).round(4)
         print(stats.to_string())
+    
+    return df
